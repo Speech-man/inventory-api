@@ -1,4 +1,4 @@
-# Project 9: Inventory API
+# Group 3: Project 9: Inventory API
 
 A simple REST API for managing products and keeping track of which ones are low or out of stock.
 
