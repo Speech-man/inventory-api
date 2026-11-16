@@ -12,7 +12,7 @@ app.get('/', (req, res) => {
 });
 
 // Product routes
-app.use('/products', productRoutes);
+app.use('/resources', productRoutes);
 
 const PORT = process.env.PORT || 3000;
 
