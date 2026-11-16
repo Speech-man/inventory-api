@@ -31,20 +31,54 @@ To run the tests:
 - createdAt (string): set when the product is created
 - updatedAt (string): changes every time the product is updated
 
+Validation rules:
+
+- name and category must be non-empty strings.
+- quantity must be a whole number, 0 or more.
+- price must be a number, 0 or more.
+- lowStockThreshold, if given, must be a whole number, 0 or more.
+- On PUT, every field is optional, but any field you send must still be valid.
+
 ## Stock rules
 
 - Low stock: quantity is more than 0 and not more than lowStockThreshold.
 - Out of stock: quantity is 0.
 
+## Response format
+
+Successful responses are JSON with `success: true`, a `message`, and the result in `data`. Errors from the routes (such as 404) have `success: false` and a `message`. Validation errors (400) come from the validator and have an `error` and a `details` list instead.
+
 ## Endpoints
 
 - GET /resources: get all products
+- GET /resources/low-stock: get products that are low on stock
+- GET /resources/out-of-stock: get products that are out of stock
 - GET /resources/:id: get one product
 - POST /resources: add a product
 - PUT /resources/:id: update a product
 - DELETE /resources/:id: delete a product
-- GET /resources/low-stock: get products that are low on stock
-- GET /resources/out-of-stock: get products that are out of stock
+
+### GET /resources
+
+Response (200):
+```json
+{
+  "success": true,
+  "message": "All products retrieved successfully",
+  "data": [
+    {
+      "id": "3f1c2a6e-8b7d-4c1e-9a52-1d2e3f4a5b6c",
+      "name": "Pen",
+      "quantity": 10,
+      "price": 50,
+      "category": "Stationery",
+      "lowStockThreshold": 5,
+      "createdAt": "2026-11-15T10:00:00.000Z",
+      "updatedAt": "2026-11-15T10:00:00.000Z"
+    }
+  ]
+}
+```
 
 ### POST /resources
 
@@ -56,20 +90,29 @@ Request:
 Response (201):
 ```json
 {
-  "id": "3f1c2a6e-8b7d-4c1e-9a52-1d2e3f4a5b6c",
-  "name": "Pen",
-  "quantity": 10,
-  "price": 50,
-  "category": "Stationery",
-  "lowStockThreshold": 5,
-  "createdAt": "2026-11-15T10:00:00.000Z",
-  "updatedAt": "2026-11-15T10:00:00.000Z"
+  "success": true,
+  "message": "Product created successfully",
+  "data": {
+    "id": "3f1c2a6e-8b7d-4c1e-9a52-1d2e3f4a5b6c",
+    "name": "Pen",
+    "quantity": 10,
+    "price": 50,
+    "category": "Stationery",
+    "lowStockThreshold": 5,
+    "createdAt": "2026-11-15T10:00:00.000Z",
+    "updatedAt": "2026-11-15T10:00:00.000Z"
+  }
 }
 ```
 
 ### GET /resources/:id
 
-Returns the product (200). If the id doesn't exist you get 404.
+Response (200): the product is in `data`, with the message "Product retrieved successfully".
+
+If the id doesn't exist (404):
+```json
+{ "success": false, "message": "Product not found" }
+```
 
 ### PUT /resources/:id
 
@@ -80,19 +123,24 @@ Request:
 { "quantity": 4 }
 ```
 
-Response (200): the updated product, with a new updatedAt. 404 if the id doesn't exist.
+Response (200): `data` holds the updated product with a new updatedAt, and the message is "Product updated successfully". If the id doesn't exist you get 404 with "Product not found".
 
 ### DELETE /resources/:id
 
-Response: TODO (200 or 204, check the real route). 404 if the id doesn't exist.
+Response (200):
+```json
+{ "success": true, "message": "Product deleted successfully" }
+```
+
+If the id doesn't exist you get 404 with "Product not found".
 
 ### GET /resources/low-stock
 
-Returns (200) a list of the products that count as low stock.
+Response (200): `data` is a list of the products that count as low stock.
 
 ### GET /resources/out-of-stock
 
-Returns (200) a list of the products with quantity 0.
+Response (200): `data` is a list of the products with quantity 0.
 
 ### Validation error
 
@@ -106,8 +154,13 @@ Request:
 Response (400):
 ```json
 {
-  "error": "TODO: copy the real message",
-  "details": ["TODO: copy the real field errors"]
+  "error": "Validation failed",
+  "details": [
+    "name is required",
+    "category is required",
+    "quantity is required",
+    "price is required"
+  ]
 }
 ```
 
