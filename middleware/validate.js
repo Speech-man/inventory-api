@@ -5,6 +5,11 @@ function checkFields(body, requireAll) {
     return ['Request body must be a JSON object'];
   }
 
+  // Ensure update requests contain at least one field
+  if (!requireAll && Object.keys(body).length === 0) {
+    errors.push('At least one field must be provided for update');
+  }
+
 
   if (body.name === undefined) {
     if (requireAll) errors.push('name is required');
